@@ -23,6 +23,7 @@
         <entry key="app/src/main/res/layout/fragment_non_paired.xml" value="0.3359375" />
         <entry key="app/src/main/res/layout/fragment_paired.xml" value="0.3359375" />
         <entry key="app/src/main/res/layout/item_device.xml" value="0.33489583333333334" />
+        <entry key="app/src/main/res/layout/layout_loading.xml" value="0.33489583333333334" />
         <entry key="app/src/main/res/layout/layout_show_type.xml" value="0.3359375" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.201" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.201" />

@@ -36,7 +36,6 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         mContext = context
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,6 +53,7 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         return inflateView
     }
 
+
     protected abstract fun getBinding(inflater: LayoutInflater, container: ViewGroup?): VB
 
     protected open fun initSetting() {}
@@ -67,8 +67,6 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         if (!bluetoothAdapter.isEnabled) {
             Toast.makeText(mContext, "블루투스가 비활성화 상태입니다", Toast.LENGTH_SHORT).show()
         }
-
-        pairedDevices = bluetoothAdapter.bondedDevices
     }
 
     @SuppressLint("InlinedApi")
@@ -155,5 +153,7 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         val alertDialog = alertDialogBuilder.create()
         alertDialog.show()
     }
+
+
 
 }

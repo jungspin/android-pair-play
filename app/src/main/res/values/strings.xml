@@ -4,6 +4,6 @@
 
     <string name="header_string">페어링 가능한 기기를 찾아보세요</string>
     <string name="find_device_btn">기기 검색</string>
-    <string name="device_connect_btn">연결</string>
+    <string name="device_connect_btn">페어링</string>
     <string name="title_activity_device_list">DeviceListActivity</string>
 </resources>

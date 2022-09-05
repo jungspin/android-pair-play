@@ -44,5 +44,4 @@ class PairedFragment : BaseFragment<FragmentPairedBinding>() {
     }
 
 
-
 }

@@ -10,11 +10,11 @@ import android.content.IntentFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.pinslog.pairplay.adapter.DeviceAdapter
 import com.pinslog.pairplay.adapter.TYPE_NON_PAIRED
 import com.pinslog.pairplay.base.BaseFragment
 import com.pinslog.pairplay.databinding.FragmentNonPairedBinding
-
 
 @SuppressLint("MissingPermission")
 class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
@@ -35,12 +35,12 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
         registerBluetoothReceiver()
         deviceAdapter = DeviceAdapter(TYPE_NON_PAIRED)
         binding.nonPairedListRv.adapter = deviceAdapter
-
     }
 
     override fun initListener() {
         binding.nonPairedFindDeviceBtn.setOnClickListener {
             deviceAdapter.clearAll()
+            pairedDevices = bluetoothAdapter.bondedDevices
             if (bluetoothAdapter.isDiscovering) {
                 bluetoothAdapter.cancelDiscovery()
             }
@@ -78,9 +78,15 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                         p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     val bondState = p1.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
                     if (bondState == BluetoothDevice.BOND_BONDED){
+                        LoadingFragmentClass.hideLoading()
                         if (device != null) {
                             deviceAdapter.clearItem(device)
+                            Toast.makeText(mContext, "페어링 되었습니다!", Toast.LENGTH_SHORT).show()
                         }
+                    } else if (bondState == BluetoothDevice.BOND_BONDING){
+                        LoadingFragmentClass.showLoading(requireActivity())
+                    } else if (bondState == BluetoothDevice.BOND_NONE){
+                        LoadingFragmentClass.hideLoading()
                     }
 
                 }
@@ -96,6 +102,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
         intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
         mContext.registerReceiver(bluetoothReceiver, intentFilter)
     }
+
 
 
 }
