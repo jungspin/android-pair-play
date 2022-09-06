@@ -26,7 +26,7 @@ class LoadingFragment : DialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = LayoutLoadingBinding.inflate(inflater, container, false)
         dialog?.window?.setBackgroundDrawable(ColorDrawable(0x00000000))
         setStyle(STYLE_NO_FRAME, android.R.style.Theme)

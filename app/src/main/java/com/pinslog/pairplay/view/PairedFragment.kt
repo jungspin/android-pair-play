@@ -22,11 +22,6 @@ class PairedFragment : BaseFragment<FragmentPairedBinding>() {
         return binding
     }
 
-    private fun getPairedDevices(){
-        pairedDevices = bluetoothAdapter.bondedDevices
-        deviceAdapter.addItems(pairedDevices as MutableSet<BluetoothDevice>)
-    }
-
 
     override fun initSetting() {
         super.initSetting()
@@ -41,6 +36,11 @@ class PairedFragment : BaseFragment<FragmentPairedBinding>() {
             getPairedDevices()
             binding.pairedSwipeLy.isRefreshing = false
         }
+    }
+
+    private fun getPairedDevices(){
+        pairedDevices = bluetoothAdapter.bondedDevices
+        deviceAdapter.addItems(pairedDevices as MutableSet<BluetoothDevice>)
     }
 
 

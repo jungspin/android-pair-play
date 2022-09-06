@@ -5,16 +5,18 @@ import android.bluetooth.BluetoothDevice
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.pinslog.pairplay.databinding.ItemDeviceBinding
+import com.pinslog.pairplay.util.DiffUtilCallback
 
 const val TYPE_NON_PAIRED = 0
 const val TYPE_PAIRED = 1
 
-@SuppressLint("NotifyDataSetChanged")
 class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var deviceSet = mutableSetOf<BluetoothDevice>()
+
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -34,25 +36,34 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
 
     fun addItem(device: BluetoothDevice) {
         deviceSet.add(device)
-        notifyDataSetChanged()
+        notifyItemInserted(deviceSet.size)
     }
 
     fun addItems(devices: MutableSet<BluetoothDevice>) {
-        deviceSet.addAll(devices)
-        notifyDataSetChanged()
+        devices.let {
+            val diffCallback = DiffUtilCallback(devices, deviceSet)
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+            deviceSet.run {
+                clear()
+                addAll(devices)
+                diffResult.dispatchUpdatesTo(this@DeviceAdapter)
+            }
+        }
     }
 
     fun clearItem(device: BluetoothDevice){
         if (deviceSet.contains(device)){
+            val index = deviceSet.indexOf(device)
             deviceSet.remove(device)
-            notifyDataSetChanged()
+            notifyItemRemoved(index)
         }
     }
 
     fun clearAll() {
         if (deviceSet.isNotEmpty()){
             deviceSet.clear()
-            notifyDataSetChanged()
+            notifyItemRangeRemoved(0, deviceSet.size)
         }
     }
 
@@ -70,7 +81,6 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
                 } catch (e: Exception) {
                     e.stackTrace
                 }
-
             }
         }
 
