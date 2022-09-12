@@ -62,8 +62,8 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
 
     fun clearAll() {
         if (deviceSet.isNotEmpty()){
-            deviceSet.clear()
             notifyItemRangeRemoved(0, deviceSet.size)
+            deviceSet.clear()
         }
     }
 

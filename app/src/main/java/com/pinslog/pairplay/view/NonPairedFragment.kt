@@ -39,12 +39,22 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
 
     override fun initListener() {
         binding.nonPairedFindDeviceBtn.setOnClickListener {
-            deviceAdapter.clearAll()
-            pairedDevices = bluetoothAdapter.bondedDevices
-            if (bluetoothAdapter.isDiscovering) {
-                bluetoothAdapter.cancelDiscovery()
+            val text = binding.nonPairedFindDeviceBtn.text
+            if (text.equals("기기 검색")){
+                deviceAdapter.clearAll()
+
+                if (bluetoothAdapter.isDiscovering) {
+                    bluetoothAdapter.cancelDiscovery()
+                }
+                bluetoothAdapter.startDiscovery()
+                binding.nonPairedFindDeviceBtn.text = "검색 중지"
+            } else if (text.equals("검색 중지")) {
+                if (bluetoothAdapter.isDiscovering) {
+                    bluetoothAdapter.cancelDiscovery()
+                }
+                binding.nonPairedFindDeviceBtn.text = "기기 검색"
             }
-            bluetoothAdapter.startDiscovery()
+
         }
     }
 
@@ -58,6 +68,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                     val device: BluetoothDevice? =
                         p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
 
+                    pairedDevices = bluetoothAdapter.bondedDevices
                     if (!pairedDevices.contains(device) && device != null) {
                         if (device.name != null) {
                             deviceAdapter.addItem(device)
@@ -71,6 +82,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
                     // 검색이 종료되었습니다
                     binding.nonPairedProgress.visibility = View.INVISIBLE
+                    binding.nonPairedFindDeviceBtn.text = "기기 검색"
                 }
                 BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
 
@@ -78,15 +90,15 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                         p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     val bondState = p1.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
                     if (bondState == BluetoothDevice.BOND_BONDED){
-                        LoadingFragmentClass.hideLoading()
+                        LoadingFragment.hideLoading()
                         if (device != null) {
                             deviceAdapter.clearItem(device)
                             Toast.makeText(mContext, "페어링 되었습니다!", Toast.LENGTH_SHORT).show()
                         }
                     } else if (bondState == BluetoothDevice.BOND_BONDING){
-                        LoadingFragmentClass.showLoading(requireActivity())
+                        LoadingFragment.showLoading(requireActivity())
                     } else if (bondState == BluetoothDevice.BOND_NONE){
-                        LoadingFragmentClass.hideLoading()
+                        LoadingFragment.hideLoading()
                     }
 
                 }

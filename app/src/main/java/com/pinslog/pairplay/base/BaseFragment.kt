@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
+
 
 @SuppressLint("MissingPermission")
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
@@ -36,6 +38,11 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         mContext = context
     }
 
+    override fun onStart() {
+        super.onStart()
+        checkPermission()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -44,10 +51,9 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         binding = getBinding(inflater, container)
         inflateView = binding.root as ViewGroup
 
-        checkPermission()
-        if (isAllowed) {
-            settingBluetooth()
-        }
+
+
+        settingBluetooth()
         initSetting()
         initListener()
         return inflateView
@@ -61,19 +67,23 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
 
 
     private fun settingBluetooth() {
-        val manager = mContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothAdapter = manager.adapter
+        if (isAllowed) {
+            val manager = mContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothAdapter = manager.adapter
 
-        if (!bluetoothAdapter.isEnabled) {
-            Toast.makeText(mContext, "블루투스가 비활성화 상태입니다", Toast.LENGTH_SHORT).show()
+            if (!bluetoothAdapter.isEnabled) {
+                Toast.makeText(mContext, "블루투스가 비활성화 상태입니다", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            showWarning()
         }
+
     }
 
     @SuppressLint("InlinedApi")
     private fun checkPermission() {
         val requiredPermissionS = arrayOf(BLUETOOTH_SCAN, BLUETOOTH_CONNECT)
-        val requiredPermissionQ =
-            arrayOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
+        val requiredPermissionQ = arrayOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
         val rejectPermissionList = ArrayList<String>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             requestPermissionLauncher.launch(requiredPermissionS)
@@ -153,7 +163,6 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         val alertDialog = alertDialogBuilder.create()
         alertDialog.show()
     }
-
 
 
 }
