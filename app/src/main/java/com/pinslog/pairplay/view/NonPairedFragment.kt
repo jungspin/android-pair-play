@@ -7,10 +7,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.pinslog.pairplay.adapter.DeviceAdapter
 import com.pinslog.pairplay.adapter.TYPE_NON_PAIRED
 import com.pinslog.pairplay.base.BaseFragment
@@ -39,22 +41,38 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
 
     override fun initListener() {
         binding.nonPairedFindDeviceBtn.setOnClickListener {
-            val text = binding.nonPairedFindDeviceBtn.text
-            if (text.equals("기기 검색")){
-                deviceAdapter.clearAll()
+            if (!bluetoothAdapter.isEnabled){
+                val alertDialogBuilder = AlertDialog.Builder(mContext)
+                alertDialogBuilder.setMessage("블루투스가 비활성화 상태입니다.\n블루투스를 켜주세요!")
+                    .setPositiveButton("활성화 하기") { dialog, id ->
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_BLUETOOTH_SETTINGS
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        mContext.startActivity(intent)
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("앱 종료하기") { dialog, id ->
+                        requireActivity().finish()
+                    }
+                val alertDialog = alertDialogBuilder.create()
+                alertDialog.show()
+            } else {
+                val text = binding.nonPairedFindDeviceBtn.text
+                if (text.equals("기기 검색")){
+                    deviceAdapter.clearAll()
 
-                if (bluetoothAdapter.isDiscovering) {
-                    bluetoothAdapter.cancelDiscovery()
+                    if (bluetoothAdapter.isDiscovering) {
+                        bluetoothAdapter.cancelDiscovery()
+                    }
+                    bluetoothAdapter.startDiscovery()
+                    binding.nonPairedFindDeviceBtn.text = "검색 중지"
+                } else if (text.equals("검색 중지")) {
+                    if (bluetoothAdapter.isDiscovering) {
+                        bluetoothAdapter.cancelDiscovery()
+                    }
+                    binding.nonPairedFindDeviceBtn.text = "기기 검색"
                 }
-                bluetoothAdapter.startDiscovery()
-                binding.nonPairedFindDeviceBtn.text = "검색 중지"
-            } else if (text.equals("검색 중지")) {
-                if (bluetoothAdapter.isDiscovering) {
-                    bluetoothAdapter.cancelDiscovery()
-                }
-                binding.nonPairedFindDeviceBtn.text = "기기 검색"
             }
-
         }
     }
 
