@@ -18,7 +18,6 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
     private var deviceSet = mutableSetOf<BluetoothDevice>()
 
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = ItemDeviceBinding.inflate(layoutInflater, parent, false)
@@ -52,8 +51,8 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-    fun clearItem(device: BluetoothDevice){
-        if (deviceSet.contains(device)){
+    fun clearItem(device: BluetoothDevice) {
+        if (deviceSet.contains(device)) {
             val index = deviceSet.indexOf(device)
             deviceSet.remove(device)
             notifyItemRemoved(index)
@@ -61,7 +60,7 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
     }
 
     fun clearAll() {
-        if (deviceSet.isNotEmpty()){
+        if (deviceSet.isNotEmpty()) {
             notifyItemRangeRemoved(0, deviceSet.size)
             deviceSet.clear()
         }
@@ -76,11 +75,26 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
 
         init {
             binding.itemConnectBtn.setOnClickListener {
-                try {
-                    device.createBond()
-                } catch (e: Exception) {
-                    e.stackTrace
+                when (type) {
+                    TYPE_NON_PAIRED -> {
+                        try {
+                            device.createBond()
+                        } catch (e: Exception) {
+                            e.stackTrace
+                        }
+                    }
+                    TYPE_PAIRED -> {
+                        try {
+                            val pair = device.javaClass.getMethod("removeBond")
+                            pair.invoke(device) as Boolean
+                            binding.itemProgress.visibility = View.VISIBLE
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+
+                    }
                 }
+
             }
         }
 
@@ -95,8 +109,9 @@ class DeviceAdapter(private val type: Int) : RecyclerView.Adapter<RecyclerView.V
                     binding.itemConnectBtn.visibility = View.VISIBLE
                 }
                 TYPE_PAIRED -> {
-                    binding.itemConnectBtn.visibility = View.INVISIBLE
-                    binding.itemConnectBtn.visibility = View.GONE
+                    binding.itemConnectBtn.visibility = View.VISIBLE
+                    binding.itemProgress.visibility = View.INVISIBLE
+                    binding.itemConnectBtn.text = "등록 해제"
                 }
             }
         }

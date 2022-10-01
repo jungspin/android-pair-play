@@ -19,12 +19,12 @@ import com.pinslog.pairplay.adapter.TYPE_NON_PAIRED
 import com.pinslog.pairplay.base.BaseFragment
 import com.pinslog.pairplay.databinding.FragmentNonPairedBinding
 
+const val BLUETOOTH_SCAN_TEXT = "기기 검색"
+const val BLUETOOTH_SCAN_STOP_TEXT = "검색 중지"
 
 @SuppressLint("MissingPermission")
 class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
 
-    private val BLUETOOTH_SCAN_TEXT = getText(R.string.non_bluetooth_scan)
-    private val BLUETOOTH_SCAN_STOP_TEXT = getText(R.string.non_bluetooth_scan)
     private lateinit var deviceAdapter: DeviceAdapter
 
     override fun getBinding(
@@ -38,7 +38,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
 
     override fun initSetting() {
         super.initSetting()
-        registerBluetoothReceiver()
+
         deviceAdapter = DeviceAdapter(TYPE_NON_PAIRED)
         binding.nonPairedListRv.adapter = deviceAdapter
     }
@@ -48,7 +48,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
     }
 
     /**
-     * 기기검색버튼 클릭리스지
+     * 기기검색버튼 클릭리스너
      */
     private val findDeviceListener = View.OnClickListener {
         if (!bluetoothAdapter.isEnabled) {
@@ -99,7 +99,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
         val intentFilter = IntentFilter()
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND)
         mContext.registerReceiver(bluetoothReceiver, intentFilter)
     }
@@ -157,10 +157,16 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onResume() {
+        super.onResume()
+        registerBluetoothReceiver()
+    }
+
+    override fun onPause() {
+        super.onPause()
         mContext.unregisterReceiver(bluetoothReceiver)
     }
+
 
 
 }

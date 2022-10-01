@@ -2,6 +2,10 @@ package com.pinslog.pairplay.view
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.pinslog.pairplay.adapter.DeviceAdapter
@@ -41,6 +45,48 @@ class PairedFragment : BaseFragment<FragmentPairedBinding>() {
     private fun getPairedDevices(){
         pairedDevices = bluetoothAdapter.bondedDevices
         deviceAdapter.addItems(pairedDevices as MutableSet<BluetoothDevice>)
+    }
+
+    /**
+     * 블루투스 리시버를 등록합니다.
+     */
+    private fun registerBluetoothReceiver() {
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        mContext.registerReceiver(bluetoothReceiver, intentFilter)
+    }
+
+    /**
+     * 블루투스 리시버
+     */
+    private val bluetoothReceiver = object : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            val action = p1?.action
+            when (action) {
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+
+                    val device: BluetoothDevice? =
+                        p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val bondState = p1.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
+                    if (bondState == BluetoothDevice.BOND_NONE) {
+                        if (device != null) {
+                            deviceAdapter.clearItem(device)
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        registerBluetoothReceiver()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mContext.unregisterReceiver(bluetoothReceiver)
     }
 
 
