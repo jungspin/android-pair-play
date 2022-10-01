@@ -13,14 +13,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import com.pinslog.pairplay.R
 import com.pinslog.pairplay.adapter.DeviceAdapter
 import com.pinslog.pairplay.adapter.TYPE_NON_PAIRED
 import com.pinslog.pairplay.base.BaseFragment
 import com.pinslog.pairplay.databinding.FragmentNonPairedBinding
 
+
 @SuppressLint("MissingPermission")
 class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
 
+    private val BLUETOOTH_SCAN_TEXT = getText(R.string.non_bluetooth_scan)
+    private val BLUETOOTH_SCAN_STOP_TEXT = getText(R.string.non_bluetooth_scan)
     private lateinit var deviceAdapter: DeviceAdapter
 
     override fun getBinding(
@@ -40,43 +44,69 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
     }
 
     override fun initListener() {
-        binding.nonPairedFindDeviceBtn.setOnClickListener {
-            if (!bluetoothAdapter.isEnabled){
-                val alertDialogBuilder = AlertDialog.Builder(mContext)
-                alertDialogBuilder.setMessage("블루투스가 비활성화 상태입니다.\n블루투스를 켜주세요!")
-                    .setPositiveButton("활성화 하기") { dialog, id ->
-                        val intent = Intent()
-                        intent.action = Settings.ACTION_BLUETOOTH_SETTINGS
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        mContext.startActivity(intent)
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton("앱 종료하기") { dialog, id ->
-                        requireActivity().finish()
-                    }
-                val alertDialog = alertDialogBuilder.create()
-                alertDialog.show()
-            } else {
-                val text = binding.nonPairedFindDeviceBtn.text
-                if (text.equals("기기 검색")){
-                    deviceAdapter.clearAll()
+        binding.nonPairedFindDeviceBtn.setOnClickListener(findDeviceListener)
+    }
 
-                    if (bluetoothAdapter.isDiscovering) {
-                        bluetoothAdapter.cancelDiscovery()
-                    }
-                    bluetoothAdapter.startDiscovery()
-                    binding.nonPairedFindDeviceBtn.text = "검색 중지"
-                } else if (text.equals("검색 중지")) {
-                    if (bluetoothAdapter.isDiscovering) {
-                        bluetoothAdapter.cancelDiscovery()
-                    }
-                    binding.nonPairedFindDeviceBtn.text = "기기 검색"
+    /**
+     * 기기검색버튼 클릭리스지
+     */
+    private val findDeviceListener = View.OnClickListener {
+        if (!bluetoothAdapter.isEnabled) {
+            val alertDialogBuilder = AlertDialog.Builder(mContext)
+            alertDialogBuilder.setMessage(getText(R.string.non_bluetooth_disable_text))
+                .setPositiveButton(getText(R.string.non_bluetooth_make_enable)) { dialog, id ->
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_BLUETOOTH_SETTINGS
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    mContext.startActivity(intent)
+                    dialog.dismiss()
                 }
+                .setNegativeButton(getText(R.string.non_finish_app)) { dialog, id ->
+                    requireActivity().finish()
+                }
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        } else {
+            val text = binding.nonPairedFindDeviceBtn.text
+            if (text.equals(BLUETOOTH_SCAN_TEXT)) {
+                deviceAdapter.clearAll()
+
+                if (bluetoothAdapter.isDiscovering) {
+                    bluetoothAdapter.cancelDiscovery()
+                }
+                if (bluetoothAdapter.startDiscovery()) {
+                    binding.nonPairedFindDeviceBtn.text = BLUETOOTH_SCAN_STOP_TEXT
+                } else {
+                    Toast.makeText(mContext, getText(R.string.non_bluetooth_cant_scan), Toast.LENGTH_SHORT).show()
+                }
+
+
+            } else if (text.equals(BLUETOOTH_SCAN_STOP_TEXT)) {
+                if (bluetoothAdapter.isDiscovering) {
+                    bluetoothAdapter.cancelDiscovery()
+                }
+                binding.nonPairedFindDeviceBtn.text = BLUETOOTH_SCAN_TEXT
             }
+
         }
     }
 
 
+    /**
+     * 블루투스 리시버를 등록합니다.
+     */
+    private fun registerBluetoothReceiver() {
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND)
+        mContext.registerReceiver(bluetoothReceiver, intentFilter)
+    }
+
+    /**
+     * 블루투스 리시버
+     */
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
             val action = p1?.action
@@ -93,29 +123,32 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                         }
                     }
                 }
+
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
                     // 검색중입니다..
                     binding.nonPairedProgress.visibility = View.VISIBLE
                 }
+
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
                     // 검색이 종료되었습니다
                     binding.nonPairedProgress.visibility = View.INVISIBLE
-                    binding.nonPairedFindDeviceBtn.text = "기기 검색"
+                    binding.nonPairedFindDeviceBtn.text = BLUETOOTH_SCAN_TEXT
                 }
+
                 BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
 
                     val device: BluetoothDevice? =
                         p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     val bondState = p1.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
-                    if (bondState == BluetoothDevice.BOND_BONDED){
+                    if (bondState == BluetoothDevice.BOND_BONDED) {
                         LoadingFragment.hideLoading()
                         if (device != null) {
                             deviceAdapter.clearItem(device)
-                            Toast.makeText(mContext, "페어링 되었습니다!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(mContext, getString(R.string.non_bluetooth_paired), Toast.LENGTH_SHORT).show()
                         }
-                    } else if (bondState == BluetoothDevice.BOND_BONDING){
+                    } else if (bondState == BluetoothDevice.BOND_BONDING) {
                         LoadingFragment.showLoading(requireActivity())
-                    } else if (bondState == BluetoothDevice.BOND_NONE){
+                    } else if (bondState == BluetoothDevice.BOND_NONE) {
                         LoadingFragment.hideLoading()
                     }
 
@@ -124,15 +157,10 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
         }
     }
 
-    private fun registerBluetoothReceiver() {
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-        intentFilter.addAction(BluetoothDevice.ACTION_FOUND)
-        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        mContext.registerReceiver(bluetoothReceiver, intentFilter)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mContext.unregisterReceiver(bluetoothReceiver)
     }
-
 
 
 }

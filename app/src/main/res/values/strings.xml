@@ -5,5 +5,12 @@
     <string name="header_string">페어링 가능한 기기를 찾아보세요</string>
     <string name="find_device_btn">기기 검색</string>
     <string name="device_connect_btn">페어링</string>
-    <string name="title_activity_device_list">DeviceListActivity</string>
+    <string name="title_activity_device_list">DeviceListActivity</string>너
+    <string name="non_bluetooth_disable_text">블루투스가 비활성화 상태입니다.\n블루투스를 켜주세요!</string>
+    <string name="non_bluetooth_make_enable">활성화 하기</string>
+    <string name="non_finish_app">앱 종료하기</string>
+    <string name="non_bluetooth_scan">기기 검색</string>
+    <string name="non_bluetooth_stop_scan">검색 중지</string>
+    <string name="non_bluetooth_cant_scan">검색을 시작할 수 없습니다</string>
+    <string name="non_bluetooth_paired">페어링 되었습니다!</string>
 </resources>
