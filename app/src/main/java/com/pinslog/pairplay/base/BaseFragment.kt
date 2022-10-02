@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +21,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
+import com.pinslog.pairplay.adapter.DeviceAdapter
 
 
 @SuppressLint("MissingPermission")
@@ -66,6 +66,9 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     protected open fun initListener() {}
 
 
+    /**
+     * 블루투스 어댑터를 초기화합니다.
+     */
     private fun settingBluetooth() {
         if (isAllowed) {
             val manager = mContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -80,6 +83,18 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
 
     }
 
+    /**
+     * 페어링 또는 연결 해제를
+     * 수행하고 난 후의 행위를 정의합니다.
+     */
+    protected fun setBluetoothAfter(device: BluetoothDevice, deviceAdapter: DeviceAdapter, content: String){
+        deviceAdapter.clearItem(device)
+        Toast.makeText(mContext, content, Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * 권한을 체크합니다.
+     */
     @SuppressLint("InlinedApi")
     private fun checkPermission() {
         val requiredPermissionS = arrayOf(BLUETOOTH_SCAN, BLUETOOTH_CONNECT)
@@ -145,6 +160,10 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
             }
         }
 
+    /**
+     * 권한이 부여되지 않았을 경우
+     * 다이얼로그를 띄웁니다.
+     */
     private fun showWarning() {
         val alertDialogBuilder = AlertDialog.Builder(mContext)
         alertDialogBuilder.setMessage("권한을 허용하지 않을 경우\n해당 앱을 사용할 수 없습니다.")

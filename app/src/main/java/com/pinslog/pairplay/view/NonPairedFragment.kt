@@ -143,11 +143,11 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                     if (bondState == BluetoothDevice.BOND_BONDED) {
                         LoadingFragment.hideLoading()
                         if (device != null) {
-                            deviceAdapter.clearItem(device)
-                            Toast.makeText(mContext, getString(R.string.non_bluetooth_paired), Toast.LENGTH_SHORT).show()
+                            val content = "${device.name} 페어링 완료"
+                            setBluetoothAfter(device, deviceAdapter, content)
                         }
                     } else if (bondState == BluetoothDevice.BOND_BONDING) {
-                        LoadingFragment.showLoading(requireActivity())
+                        LoadingFragment.showLoading(mContext)
                     } else if (bondState == BluetoothDevice.BOND_NONE) {
                         LoadingFragment.hideLoading()
                     }
@@ -156,6 +156,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
             }
         }
     }
+
 
     override fun onResume() {
         super.onResume()

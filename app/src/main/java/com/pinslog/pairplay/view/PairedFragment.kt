@@ -42,6 +42,9 @@ class PairedFragment : BaseFragment<FragmentPairedBinding>() {
         }
     }
 
+    /**
+     * 페어링된 블루투스 디바이스 목록을 가져옵니다
+     */
     private fun getPairedDevices(){
         pairedDevices = bluetoothAdapter.bondedDevices
         deviceAdapter.addItems(pairedDevices as MutableSet<BluetoothDevice>)
@@ -70,7 +73,8 @@ class PairedFragment : BaseFragment<FragmentPairedBinding>() {
                     val bondState = p1.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
                     if (bondState == BluetoothDevice.BOND_NONE) {
                         if (device != null) {
-                            deviceAdapter.clearItem(device)
+                            val content = "${device.name} 등록 해제"
+                            setBluetoothAfter(device, deviceAdapter, content)
                         }
                     }
 
