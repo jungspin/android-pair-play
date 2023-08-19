@@ -12,12 +12,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import com.pinslog.pairplay.R
 import com.pinslog.pairplay.adapter.DeviceAdapter
 import com.pinslog.pairplay.adapter.TYPE_NON_PAIRED
 import com.pinslog.pairplay.base.BaseFragment
 import com.pinslog.pairplay.databinding.FragmentNonPairedBinding
+import java.lang.RuntimeException
 
 const val BLUETOOTH_SCAN_TEXT = "기기 검색"
 const val BLUETOOTH_SCAN_STOP_TEXT = "검색 중지"
@@ -26,6 +28,19 @@ const val BLUETOOTH_SCAN_STOP_TEXT = "검색 중지"
 class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
 
     private lateinit var deviceAdapter: DeviceAdapter
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    }
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            checkDiscovery()
+            requireActivity().finish()
+        }
+
+    }
 
     override fun getBinding(
         inflater: LayoutInflater,
@@ -71,26 +86,24 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
             if (text.equals(BLUETOOTH_SCAN_TEXT)) {
                 deviceAdapter.clearAll()
 
-                if (bluetoothAdapter.isDiscovering) {
-                    bluetoothAdapter.cancelDiscovery()
-                }
+                checkDiscovery()
                 if (bluetoothAdapter.startDiscovery()) {
                     binding.nonPairedFindDeviceBtn.text = BLUETOOTH_SCAN_STOP_TEXT
                 } else {
-                    Toast.makeText(mContext, getText(R.string.non_bluetooth_cant_scan), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        mContext,
+                        getText(R.string.non_bluetooth_cant_scan),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-
 
             } else if (text.equals(BLUETOOTH_SCAN_STOP_TEXT)) {
-                if (bluetoothAdapter.isDiscovering) {
-                    bluetoothAdapter.cancelDiscovery()
-                }
+                checkDiscovery()
                 binding.nonPairedFindDeviceBtn.text = BLUETOOTH_SCAN_TEXT
             }
 
         }
     }
-
 
     /**
      * 블루투스 리시버를 등록합니다.
@@ -136,7 +149,6 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                 }
 
                 BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
-
                     val device: BluetoothDevice? =
                         p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     val bondState = p1.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
@@ -147,6 +159,7 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
                             setBluetoothAfter(device, deviceAdapter, content)
                         }
                     } else if (bondState == BluetoothDevice.BOND_BONDING) {
+                        checkDiscovery()
                         LoadingFragment.showLoading(mContext)
                     } else if (bondState == BluetoothDevice.BOND_NONE) {
                         LoadingFragment.hideLoading()
@@ -154,6 +167,12 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
 
                 }
             }
+        }
+    }
+
+    private fun checkDiscovery() {
+        if (bluetoothAdapter.isDiscovering) {
+            bluetoothAdapter.cancelDiscovery()
         }
     }
 
@@ -167,7 +186,6 @@ class NonPairedFragment : BaseFragment<FragmentNonPairedBinding>() {
         super.onPause()
         mContext.unregisterReceiver(bluetoothReceiver)
     }
-
 
 
 }

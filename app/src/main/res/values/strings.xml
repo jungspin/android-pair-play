@@ -13,4 +13,6 @@
     <string name="non_bluetooth_stop_scan">검색 중지</string>
     <string name="non_bluetooth_cant_scan">검색을 시작할 수 없습니다</string>
     <string name="non_bluetooth_paired">페어링 되었습니다!</string>
+    <string name="error_text">예상치 못한 오류가 발생했습니다.\n해당 문제가 지속되는 경우 개발자에게 문의해주세요.\njungspinn@gmail.com</string>
+    <string name="error_btn">재시작</string>
 </resources>

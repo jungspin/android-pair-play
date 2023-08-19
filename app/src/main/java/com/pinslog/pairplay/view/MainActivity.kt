@@ -11,7 +11,6 @@ import com.pinslog.pairplay.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private val mContext: Context = this
     private lateinit var binding: ActivityMainBinding
     private val tabTitleArray = arrayOf("페어링 가능 목록", "페어링 된 기기")
 
@@ -34,10 +33,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        LoadingFragment.hideLoading()
-    }
 
 
 

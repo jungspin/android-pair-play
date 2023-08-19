@@ -1,18 +1,20 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 
 android {
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.pinslog.pairplay"
         minSdk 21
-        targetSdk 31
-        versionCode 4
-        versionName "1.0.1"
+        targetSdk 33
+        versionCode 6
+        versionName "1.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -50,7 +52,6 @@ android {
     }
     buildFeatures {
         viewBinding true
-        compose true
     }
     composeOptions {
         kotlinCompilerExtensionVersion compose_version
@@ -84,4 +85,11 @@ dependencies {
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     implementation 'com.airbnb.android:lottie:3.7.0'
+
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:32.2.2')
+
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 }
