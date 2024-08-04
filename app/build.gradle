@@ -7,13 +7,14 @@ plugins {
 
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.pinslog.pairplay"
         minSdk 21
-        targetSdk 33
-        versionCode 6
+        //noinspection EditedTargetSdkVersion
+        targetSdk 34
+        versionCode 8
         versionName "1.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
